@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.rtl.min.css"
+        integrity="sha384-PRrgQVJ8NNHGieOA1grGdCTIt4h21CzJs6SnWH4YMQ6G5F5+IEzOHz67L4SQaF0o" crossorigin="anonymous">
+    <style>
+        .completed {
+            text-decoration: line-through;
+            /* Add a line-through style for completed tasks */
+            background-color: #f0f0f0;
+            /* Add a background color for better visual distinction */
+        }
+
+        .container {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: rgb(205, 211, 211);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 30px;
+            background-color: rgb(168, 174, 180);
+            color:white;
+            margin:20px 110px;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+        .comp,
+        .pend {
+            margin-top: 5px;
+            background-color: rgb(165, 174, 175);
+            padding: 10px;
+            border-radius: 8px;
+            
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>To-Do App</h1>
+    <div class="container">
+        <form>
+            <div class="mb-3">
+                <label for="title" class="form-label text-dark">
+                    <h3>Todo Items</h3>
+                </label>
+                <input type="text" class="form-control" id="title"
+                    placeholder="Write something to add in the ToDo List.">
+            </div>
+            <button id="add" type="add" class="btn btn-dark my-2">Add Item</button>
+            <!-- <button id="deleteBtn" type="delete" class="btn btn-danger">Delete</button> -->
+        </form>
+        <div class="pend">
+            <h3>Pending Tasks List -</h3>
+            <ul class="list-group mx-2 my-3" id="todo-list">
+
+                <!-- <button id="deleteBtn" type="delete" class="btn btn-danger">Delete</button> -->
+            </ul>
+        </div>
+        <div class="comp">
+            <h3>Completed Tasks List -</h3>
+            <ul class="list-group mx-2 my-3" id="completedTasks"></ul>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
+        crossorigin="anonymous"></script>
+
+<script>
+    const submitBtn = document.getElementById("add");
+    const titleInput = document.getElementById("title");
+    const todoList = document.querySelector(".list-group");
+    const pendingTasksList = document.getElementById('pendingTasks');
+    const completedTasksList = document.getElementById('completedTasks');
+  
+    submitBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const title = titleInput.value;
+      addTodoToList(title);
+    });
+  
+    function addTodoToList(title) {
+      if (title.trim() === "") return; // Check if the input is empty
+  
+      const listItem = document.createElement("li");
+      listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+  
+      const titleElement = document.createElement("span");
+      titleElement.textContent = ` ${title}`;
+  
+      const dateElement = document.createElement("small");
+      dateElement.textContent = getCurrentDateTime();
+  
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "form-check-input me-3";
+      checkbox.addEventListener("change", () => {
+        moveTaskToSection(listItem, checkbox.checked);
+      });
+  
+      const buttonGroup = document.createElement("div");
+      buttonGroup.className = "btn-group";
+  
+      listItem.classList.add("todo-item");
+  
+      const editButton = document.createElement("button");
+      editButton.className = "btn btn-success btn-sm me-2 rounded";
+      editButton.textContent = "Edit";
+      editButton.onclick = () => {
+        editTodoItem(listItem);
+      };
+      buttonGroup.appendChild(editButton);
+  
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "btn btn-danger btn-sm mx-2 rounded";
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = () => {
+        deleteTodoItem(listItem);
+      };
+  
+      buttonGroup.appendChild(deleteButton);
+  
+      listItem.appendChild(checkbox);
+      listItem.appendChild(titleElement);
+      listItem.appendChild(dateElement);
+      listItem.appendChild(buttonGroup);
+  
+      todoList.appendChild(listItem);
+  
+      // Clear the input field after adding the todo
+      titleInput.value = "";
+    }
+  
+    function editTodoItem(listItem) {
+      const titleElement = listItem.querySelector("span");
+      const newTitle = prompt("Edit the item:", titleElement.textContent);
+      if (newTitle !== null && newTitle.trim() !== "") {
+        titleElement.textContent = `${newTitle}`;
+      }
+    }
+  
+    function deleteTodoItem(listItem) {
+      listItem.remove();
+    }
+  
+    function moveTaskToSection(listItem, completed) {
+      const checkbox = listItem.querySelector('input[type="checkbox"]');
+      checkbox.disabled = true;
+  
+      if (completed) {
+        completedTasksList.appendChild(listItem);
+        listItem.classList.add('completed');
+      } else {
+        pendingTasksList.appendChild(listItem);
+        listItem.classList.remove('completed');
+      }
+    }
+  
+    function getCurrentDateTime() {
+      const now = new Date();
+      const date = now.toLocaleDateString();
+      const time = now.toLocaleTimeString();
+      return `${date} - ${time}`;
+    }
+  
+    // On page load, move existing tasks to the appropriate section
+    document.addEventListener('DOMContentLoaded', function () {
+      const todoItems = document.querySelectorAll('.list-group-item');
+      todoItems.forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const completed = checkbox.checked;
+        moveTaskToSection(item, completed);
+      });
+    });
+  </script>
+  
+<!-- 
+    <script>
+        const submitBtn = document.getElementById("add");
+        const titleInput = document.getElementById("title");
+        const todoList = document.querySelector(".list-group");
+        const completedTasksList = document.getElementById('completedTasks');
+
+        submitBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const title = titleInput.value;
+            addTodoToList(title);
+        });
+
+        function addTodoToList(title) {
+            if (title.trim() === "") return; // Check if the input is empty
+
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+
+            const titleElement = document.createElement("span");
+            titleElement.textContent = ` ${title}`;
+
+            const timeElement = document.createElement("span");
+            const currentTime = new Date();
+            const formattedTime = currentTime.toLocaleTimeString();
+            timeElement.textContent = ` ${formattedTime}`;
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "form-check-input me-3";
+            checkbox.addEventListener("change", () => {
+                moveTaskToSection(listItem, checkbox.checked);
+            });
+
+            const buttonGroup = document.createElement("div");
+            buttonGroup.className = "btn-group";
+
+            listItem.classList.add("todo-item");
+
+            const editButton = document.createElement("button");
+            editButton.className = "btn btn-success btn-sm me-2 rounded";
+            editButton.textContent = "Edit";
+            editButton.onclick = () => {
+                editTodoItem(listItem);
+            };
+            buttonGroup.appendChild(editButton);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "btn btn-danger btn-sm mx-2 rounded";
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = () => {
+                deleteTodoItem(listItem);
+            };
+
+            buttonGroup.appendChild(deleteButton);
+
+            listItem.appendChild(checkbox);
+            listItem.appendChild(titleElement);
+            listItem.appendChild(timeElement);
+            listItem.appendChild(buttonGroup);
+
+            todoList.appendChild(listItem);
+
+            // Clear the input field after adding the todo
+            titleInput.value = "";
+        }
+
+        function editTodoItem(listItem) {
+            const titleElement = listItem.querySelector("span");
+            const newTitle = prompt("Edit the item:", titleElement.textContent);
+            if (newTitle !== null && newTitle.trim() !== "") {
+                titleElement.textContent = `${newTitle}`;
+            }
+        }
+
+        function deleteTodoItem(listItem) {
+            listItem.remove();
+        }
+
+        function moveTaskToSection(listItem, completed) {
+            const checkbox = listItem.querySelector('input[type="checkbox"]');
+            checkbox.disabled = true;
+
+            if (completed) {
+                completedTasksList.appendChild(listItem);
+                listItem.classList.add('completed');
+            } else {
+                pendingTasksList.appendChild(listItem);
+                listItem.classList.remove('completed');
+            }
+        }
+
+        // On page load, move existing tasks to the appropriate section
+        document.addEventListener('DOMContentLoaded', function () {
+            const todoItems = document.querySelectorAll('.list-group-item');
+            todoItems.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const completed = checkbox.checked;
+                moveTaskToSection(item, completed);
+            });
+        });
+    </script> -->
+</body>
+
+</html>
